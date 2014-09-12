@@ -27,7 +27,7 @@ using namespace aruco;
 class ArSysSingleBoard
 {
 	private:
-		cv::Mat inImage;
+		cv::Mat inImage, resultImg;
 		aruco::CameraParameters camParam;
 		bool useRectifiedImages;
 		bool draw_markers;
@@ -95,6 +95,7 @@ class ArSysSingleBoard
 			{
 				cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
 				inImage = cv_ptr->image;
+				resultImg = cv_ptr->image.clone();
 
 				//detection results will go into "markers"
 				markers.clear();
@@ -126,7 +127,7 @@ class ArSysSingleBoard
 				//for each marker, draw info and its boundaries in the image
 				for(size_t i=0; draw_markers && i < markers.size(); ++i)
 				{
-					markers[i].draw(inImage,cv::Scalar(0,0,255),2);
+					markers[i].draw(resultImg,cv::Scalar(0,0,255),2);
 				}
 
 
@@ -135,11 +136,11 @@ class ArSysSingleBoard
 					//draw a 3d cube in each marker if there is 3d info
 					for(size_t i=0; i<markers.size(); ++i)
 					{
-						if (draw_markers_cube) CvDrawingUtils::draw3dCube(inImage, markers[i], camParam);
-						if (draw_markers_axis) CvDrawingUtils::draw3dAxis(inImage, markers[i], camParam);
+						if (draw_markers_cube) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
+						if (draw_markers_axis) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
 					}
 					//draw board axis
-					if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(inImage, the_board_detected, camParam);
+					if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(resultImg, the_board_detected, camParam);
 				}
 
 				if(image_pub.getNumSubscribers() > 0)
@@ -148,7 +149,7 @@ class ArSysSingleBoard
 					cv_bridge::CvImage out_msg;
 					out_msg.header.stamp = ros::Time::now();
 					out_msg.encoding = sensor_msgs::image_encodings::RGB8;
-					out_msg.image = inImage;
+					out_msg.image = resultImg;
 					image_pub.publish(out_msg.toImageMsg());
 				}
 

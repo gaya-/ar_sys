@@ -28,7 +28,7 @@ class ArSysMultiBoards
 {
 	private:
 		int boards_count;
-		cv::Mat inImage;
+		cv::Mat inImage, resultImg;
 		aruco::CameraParameters camParam;
 		bool useRectifiedImages;
 		bool draw_markers;
@@ -49,7 +49,7 @@ class ArSysMultiBoards
 
 		double* markers_size_array;
 		std::string boards_config;
-		std::string data_directory;
+		std::string boards_directory;
 
 		ros::NodeHandle nh;
 		image_transport::ImageTransport it;
@@ -73,7 +73,7 @@ class ArSysMultiBoards
 			position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
 
 			nh.param<std::string>("boards_config", boards_config, "boardConfiguration.yml");
-			nh.param<std::string>("data_directory", data_directory, "./data");
+			nh.param<std::string>("boards_directory", boards_directory, "./data");
 			nh.param<bool>("image_is_rectified", useRectifiedImages, true);
 			nh.param<bool>("draw_markers", draw_markers, false);
 			nh.param<bool>("draw_markers_cube", draw_markers_cube, false);
@@ -114,7 +114,7 @@ class ArSysMultiBoards
 			char* path = new char[256];
 			for (cv::FileNodeIterator it = boards.begin(); it!=boards.end(); ++it,board_index++ )
 			{
-				sprintf (path, "%s/%s", data_directory.c_str(), ((std::string)(*it)["path"]).c_str());
+				sprintf (path, "%s/%s", boards_directory.c_str(), ((std::string)(*it)["path"]).c_str());
 
 				boards_frame_array[board_index] = (std::string)(*it)["frame_id"];
 				boards_config_array[board_index].readFromFile(path);
@@ -129,21 +129,23 @@ class ArSysMultiBoards
 			if(!cam_info_received) return;
 
 			cv_bridge::CvImagePtr cv_ptr;
-			Board board_detected;
 			try
 			{
 				cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
 				inImage = cv_ptr->image;
+				resultImg = cv_ptr->image.clone();
 
 				for (int board_index = 0; board_index < boards_count; board_index++)
 				{
+					Board board_detected;
+
 					//detection results will go into "markers"
 					markers.clear();
 
 					//Ok, let's detect
 					mDetector.detect(inImage, markers, camParam, markers_size_array[board_index], false);
 					//Detection of the board
-					float probDetect=the_board_detector.detect(markers, boards_config_array[board_index], board_detected, camParam, markers_size_array[board_index]);
+					float probDetect = the_board_detector.detect(markers, boards_config_array[board_index], board_detected, camParam, markers_size_array[board_index]);
 					if (probDetect > 0.0)
 					{
 						tf::Transform transform = ar_sys::getTf(board_detected.Rvec, board_detected.Tvec);
@@ -168,20 +170,19 @@ class ArSysMultiBoards
 					//for each marker, draw info and its boundaries in the image
 					for(size_t i=0; draw_markers && i < markers.size(); ++i)
 					{
-						markers[i].draw(inImage,cv::Scalar(0,0,255),2);
+						markers[i].draw(resultImg,cv::Scalar(0,0,255),2);
 					}
-
 
 					if(camParam.isValid() && markers_size_array[board_index] != -1)
 					{
 						//draw a 3d cube in each marker if there is 3d info
 						for(size_t i=0; i<markers.size(); ++i)
 						{
-							if (draw_markers_cube) CvDrawingUtils::draw3dCube(inImage, markers[i], camParam);
-							if (draw_markers_axis) CvDrawingUtils::draw3dAxis(inImage, markers[i], camParam);
+							if (draw_markers_cube) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
+							if (draw_markers_axis) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
 						}
 						//draw board axis
-						if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(inImage, board_detected, camParam);
+						if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(resultImg, board_detected, camParam);
 					}
 				}
 
@@ -191,7 +192,7 @@ class ArSysMultiBoards
 					cv_bridge::CvImage out_msg;
 					out_msg.header.stamp = ros::Time::now();
 					out_msg.encoding = sensor_msgs::image_encodings::RGB8;
-					out_msg.image = inImage;
+					out_msg.image = resultImg;
 					image_pub.publish(out_msg.toImageMsg());
 				}
 
