@@ -24,7 +24,7 @@
 
 using namespace aruco;
 
-class ArucoSimpleBoard
+class ArSysSingleBoard
 {
 	private:
 		cv::Mat inImage;
@@ -57,13 +57,13 @@ class ArucoSimpleBoard
 		tf::TransformListener _tfListener;
 
 	public:
-		ArucoSimpleBoard()
+		ArSysSingleBoard()
 			: cam_info_received(false),
 			nh("~"),
 			it(nh)
 		{
-			image_sub = it.subscribe("/image", 1, &ArucoSimpleBoard::image_callback, this);
-			cam_info_sub = nh.subscribe("/camera_info", 1, &ArucoSimpleBoard::cam_info_callback, this);
+			image_sub = it.subscribe("/image", 1, &ArSysSingleBoard::image_callback, this);
+			cam_info_sub = nh.subscribe("/camera_info", 1, &ArSysSingleBoard::cam_info_callback, this);
 
 			image_pub = it.advertise("result", 1);
 			debug_pub = it.advertise("debug", 1);
@@ -183,7 +183,7 @@ int main(int argc,char **argv)
 {
 	ros::init(argc, argv, "ar_single_board");
 
-	ArucoSimpleBoard node;
+	ArSysSingleBoard node;
 
 	ros::spin();
 }
