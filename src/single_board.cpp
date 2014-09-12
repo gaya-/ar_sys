@@ -45,9 +45,7 @@ class ArucoSimpleBoard
 		ros::Publisher pose_pub;
 		ros::Publisher transform_pub; 
 		ros::Publisher position_pub;
-		std::string marker_frame;
-		std::string camera_frame;
-		std::string reference_frame;
+		std::string board_frame;
 
 		double marker_size;
 		std::string board_config;
@@ -75,62 +73,17 @@ class ArucoSimpleBoard
 
 			nh.param<double>("marker_size", marker_size, 0.05);
 			nh.param<std::string>("board_config", board_config, "boardConfiguration.yml");
-			nh.param<std::string>("reference_frame", reference_frame, "");
-			nh.param<std::string>("camera_frame", camera_frame, "");
-			nh.param<std::string>("marker_frame", marker_frame, "");
+			nh.param<std::string>("board_frame", board_frame, "");
 			nh.param<bool>("image_is_rectified", useRectifiedImages, true);
 			nh.param<bool>("draw_markers", draw_markers, false);
 			nh.param<bool>("draw_markers_cube", draw_markers_cube, false);
 			nh.param<bool>("draw_markers_axis", draw_markers_axis, false);
 
-			ROS_ASSERT(camera_frame != "" && marker_frame != "");
-
 			the_board_config.readFromFile(board_config.c_str());
-			if ( reference_frame.empty() )
-				reference_frame = camera_frame;
 
 			ROS_INFO("Aruco node started with marker size of %f m and board configuration: %s",
 					 marker_size, board_config.c_str());
-			ROS_INFO("Aruco node will publish pose to TF with %s as parent and %s as child.",
-					 reference_frame.c_str(), marker_frame.c_str());
 		}
-
-		bool getTransform(const std::string& refFrame,
-			const std::string& childFrame,
-			tf::StampedTransform& transform)
-		{
-			std::string errMsg;
-
-			if (!_tfListener.waitForTransform
-				(refFrame,
-					childFrame,
-					ros::Time(0),
-					ros::Duration(0.5),
-					ros::Duration(0.01),
-					&errMsg)
-			 )
-			{
-				ROS_ERROR_STREAM("Unable to get pose from TF: " << errMsg);
-				return false;
-			}
-			else
-			{
-				try
-				{
-					_tfListener.lookupTransform( refFrame, childFrame,
-					ros::Time(0), //get latest available
-					transform);
-				}
-				catch ( const tf::TransformException& e)
-				{
-					ROS_ERROR_STREAM("Error in lookupTransform of " << childFrame << " in " << refFrame);
-					return false;
-				}
-
-			}
-			return true;
-		}
-
 
 		void image_callback(const sensor_msgs::ImageConstPtr& msg)
 		{
@@ -149,10 +102,31 @@ class ArucoSimpleBoard
 				mDetector.detect(inImage, markers, camParam, marker_size, false);
 				//Detection of the board
 				float probDetect=the_board_detector.detect(markers, the_board_config, the_board_detected, camParam, marker_size);
-				//for each marker, draw info and its boundaries in the image
-				for(size_t i=0; i<markers.size(); ++i)
+				if (probDetect > 0.0)
 				{
-					if (draw_markers) markers[i].draw(inImage,cv::Scalar(0,0,255),2);
+					tf::Transform transform = ar_sys::getTf(the_board_detected.Rvec, the_board_detected.Tvec);
+
+					tf::StampedTransform stampedTransform(transform, ros::Time::now(), msg->header.frame_id, board_frame);
+					br.sendTransform(stampedTransform);
+					geometry_msgs::PoseStamped poseMsg;
+					tf::poseTFToMsg(transform, poseMsg.pose);
+					poseMsg.header.frame_id = msg->header.frame_id;
+					poseMsg.header.stamp = ros::Time::now();
+					pose_pub.publish(poseMsg);
+
+					geometry_msgs::TransformStamped transformMsg;
+					tf::transformStampedTFToMsg(stampedTransform, transformMsg);
+					transform_pub.publish(transformMsg);
+
+					geometry_msgs::Vector3Stamped positionMsg;
+					positionMsg.header = transformMsg.header;
+					positionMsg.vector = transformMsg.transform.translation;
+					position_pub.publish(positionMsg);
+				}
+				//for each marker, draw info and its boundaries in the image
+				for(size_t i=0; draw_markers && i < markers.size(); ++i)
+				{
+					markers[i].draw(inImage,cv::Scalar(0,0,255),2);
 				}
 
 
@@ -164,41 +138,8 @@ class ArucoSimpleBoard
 						if (draw_markers_cube) CvDrawingUtils::draw3dCube(inImage, markers[i], camParam);
 						if (draw_markers_axis) CvDrawingUtils::draw3dAxis(inImage, markers[i], camParam);
 					}
-					if (probDetect > 0.0)
-					{
-						//draw board axis
-						CvDrawingUtils::draw3dAxis(inImage, the_board_detected, camParam);
-
-						tf::Transform transform = ar_sys::getTf(the_board_detected.Rvec, the_board_detected.Tvec);
-						tf::StampedTransform cameraToReference;
-						cameraToReference.setIdentity();
-
-						if ( reference_frame != camera_frame )
-						{
-							getTransform(reference_frame,
-										 camera_frame,
-										 cameraToReference);
-						}
-
-						transform = static_cast<tf::Transform>(cameraToReference) * transform;
-
-						tf::StampedTransform stampedTransform(transform, ros::Time::now(), reference_frame, marker_frame);
-						br.sendTransform(stampedTransform);
-						geometry_msgs::PoseStamped poseMsg;
-						tf::poseTFToMsg(transform, poseMsg.pose);
-						poseMsg.header.frame_id = reference_frame;
-						poseMsg.header.stamp = ros::Time::now();
-						pose_pub.publish(poseMsg);
-
-						geometry_msgs::TransformStamped transformMsg;
-						tf::transformStampedTFToMsg(stampedTransform, transformMsg);
-						transform_pub.publish(transformMsg);
-
-						geometry_msgs::Vector3Stamped positionMsg;
-						positionMsg.header = transformMsg.header;
-						positionMsg.vector = transformMsg.transform.translation;
-						position_pub.publish(positionMsg);
-					}
+					//draw board axis
+					if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(inImage, the_board_detected, camParam);
 				}
 
 				if(image_pub.getNumSubscribers() > 0)
