@@ -81,7 +81,7 @@ class ArSysSingleBoard
 
 			the_board_config.readFromFile(board_config.c_str());
 
-			ROS_INFO("Aruco node started with marker size of %f m and board configuration: %s",
+			ROS_INFO("ArSys node started with marker size of %f m and board configuration: %s",
 					 marker_size, board_config.c_str());
 		}
 

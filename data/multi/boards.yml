@@ -1,0 +1,5 @@
+%YAML:1.0
+ar_sys_nboards: 2
+ar_sys_boards:
+   - { frame_id:"board1", path:"board1.yml", marker_size:0.05 }
+   - { frame_id:"board2", path:"board2.yml", marker_size:0.05 }
