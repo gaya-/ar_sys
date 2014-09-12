@@ -105,6 +105,8 @@ class ArSysMultiBoards
 				throw cv::Exception ( 81818,"ArSysMultiBoards::readFromFile","invalid file type" ,__FILE__,__LINE__ );
 			fs["ar_sys_nboards"]>>boards_count;
 
+			ROS_ASSERT(boards_count > 0);
+
 			boards_config_array = new BoardConfiguration[boards_count];
 			boards_frame_array = new std::string[boards_count];
 			markers_size_array = new double[boards_count];
@@ -135,15 +137,19 @@ class ArSysMultiBoards
 				inImage = cv_ptr->image;
 				resultImg = cv_ptr->image.clone();
 
+				//detection results will go into "markers"
+				markers.clear();
+
+				//Ok, let's detect
+				double min_size = markers_size_array[0];
+				for (int board_index = 1; board_index < boards_count; board_index++)
+					if (min_size > markers_size_array[board_index]) min_size = markers_size_array[board_index];
+				mDetector.detect(inImage, markers, camParam, min_size, false);
+
 				for (int board_index = 0; board_index < boards_count; board_index++)
 				{
 					Board board_detected;
 
-					//detection results will go into "markers"
-					markers.clear();
-
-					//Ok, let's detect
-					mDetector.detect(inImage, markers, camParam, markers_size_array[board_index], false);
 					//Detection of the board
 					float probDetect = the_board_detector.detect(markers, boards_config_array[board_index], board_detected, camParam, markers_size_array[board_index]);
 					if (probDetect > 0.0)
@@ -167,22 +173,27 @@ class ArSysMultiBoards
 						positionMsg.vector = transformMsg.transform.translation;
 						position_pub.publish(positionMsg);
 					}
-					//for each marker, draw info and its boundaries in the image
-					for(size_t i=0; draw_markers && i < markers.size(); ++i)
-					{
-						markers[i].draw(resultImg,cv::Scalar(0,0,255),2);
-					}
 
-					if(camParam.isValid() && markers_size_array[board_index] != -1)
+					if(camParam.isValid() && probDetect > 0.0)
 					{
-						//draw a 3d cube in each marker if there is 3d info
-						for(size_t i=0; i<markers.size(); ++i)
-						{
-							if (draw_markers_cube) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
-							if (draw_markers_axis) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
-						}
 						//draw board axis
-						if (probDetect > 0.0) CvDrawingUtils::draw3dAxis(resultImg, board_detected, camParam);
+						CvDrawingUtils::draw3dAxis(resultImg, board_detected, camParam);
+					}
+				}
+
+				//for each marker, draw info and its boundaries in the image
+				for(size_t i=0; draw_markers && i < markers.size(); ++i)
+				{
+					markers[i].draw(resultImg,cv::Scalar(0,0,255),2);
+				}
+
+				if(camParam.isValid())
+				{
+					//draw a 3d cube in each marker if there is 3d info
+					for(size_t i=0; i<markers.size(); ++i)
+					{
+						if (draw_markers_cube) CvDrawingUtils::draw3dCube(resultImg, markers[i], camParam);
+						if (draw_markers_axis) CvDrawingUtils::draw3dAxis(resultImg, markers[i], camParam);
 					}
 				}
 
