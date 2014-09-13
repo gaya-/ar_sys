@@ -112,17 +112,17 @@ class ArSysMultiBoards
 			markers_size_array = new double[boards_count];
 
 			cv::FileNode boards=fs["ar_sys_boards"];
-			int board_index=0;
-			char* path = new char[256];
+			int board_index = 0;
 			for (cv::FileNodeIterator it = boards.begin(); it!=boards.end(); ++it,board_index++ )
 			{
-				sprintf (path, "%s/%s", boards_directory.c_str(), ((std::string)(*it)["path"]).c_str());
+				std::string path(boards_directory);
+				path.append("/");
+				path.append((std::string)(*it)["path"]);
+				boards_config_array[board_index].readFromFile(path);
 
 				boards_frame_array[board_index] = (std::string)(*it)["frame_id"];
-				boards_config_array[board_index].readFromFile(path);
 				markers_size_array[board_index] = (double)(*it)["marker_size"];
 			}
-			delete[] path;
 		}
 
 		void image_callback(const sensor_msgs::ImageConstPtr& msg)
