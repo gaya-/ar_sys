@@ -87,7 +87,6 @@ class ArSysSingleBoard
 
 		void image_callback(const sensor_msgs::ImageConstPtr& msg)
 		{
-			static tf::TransformBroadcaster br;
 			if(!cam_info_received) return;
 
 			cv_bridge::CvImagePtr cv_ptr;
@@ -108,7 +107,7 @@ class ArSysSingleBoard
 					tf::Transform transform = ar_sys::getTf(the_board_detected.Rvec, the_board_detected.Tvec);
 
 					tf::StampedTransform stampedTransform(transform, msg->header.stamp, msg->header.frame_id, board_frame);
-					br.sendTransform(stampedTransform);
+
 					geometry_msgs::PoseStamped poseMsg;
 					tf::poseTFToMsg(transform, poseMsg.pose);
 					poseMsg.header.frame_id = msg->header.frame_id;
