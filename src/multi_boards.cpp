@@ -156,12 +156,12 @@ class ArSysMultiBoards
 					{
 						tf::Transform transform = ar_sys::getTf(board_detected.Rvec, board_detected.Tvec);
 
-						tf::StampedTransform stampedTransform(transform, ros::Time::now(), msg->header.frame_id, boards_frame_array[board_index]);
+						tf::StampedTransform stampedTransform(transform, msg->header.stamp, msg->header.frame_id, boards_frame_array[board_index]);
 						br.sendTransform(stampedTransform);
 						geometry_msgs::PoseStamped poseMsg;
 						tf::poseTFToMsg(transform, poseMsg.pose);
 						poseMsg.header.frame_id = msg->header.frame_id;
-						poseMsg.header.stamp = ros::Time::now();
+						poseMsg.header.stamp = msg->header.stamp;
 						pose_pub.publish(poseMsg);
 
 						geometry_msgs::TransformStamped transformMsg;
@@ -172,12 +172,12 @@ class ArSysMultiBoards
 						positionMsg.header = transformMsg.header;
 						positionMsg.vector = transformMsg.transform.translation;
 						position_pub.publish(positionMsg);
-					}
 
-					if(camParam.isValid() && probDetect > 0.0)
-					{
-						//draw board axis
-						CvDrawingUtils::draw3dAxis(resultImg, board_detected, camParam);
+						if(camParam.isValid())
+						{
+							//draw board axis
+							CvDrawingUtils::draw3dAxis(resultImg, board_detected, camParam);
+						}
 					}
 				}
 
@@ -201,7 +201,8 @@ class ArSysMultiBoards
 				{
 					//show input with augmented information
 					cv_bridge::CvImage out_msg;
-					out_msg.header.stamp = ros::Time::now();
+					out_msg.header.frame_id = msg->header.frame_id;
+					out_msg.header.stamp = msg->header.stamp;
 					out_msg.encoding = sensor_msgs::image_encodings::RGB8;
 					out_msg.image = resultImg;
 					image_pub.publish(out_msg.toImageMsg());
@@ -211,7 +212,8 @@ class ArSysMultiBoards
 				{
 					//show also the internal image resulting from the threshold operation
 					cv_bridge::CvImage debug_msg;
-					debug_msg.header.stamp = ros::Time::now();
+					debug_msg.header.frame_id = msg->header.frame_id;
+					debug_msg.header.stamp = msg->header.stamp;
 					debug_msg.encoding = sensor_msgs::image_encodings::MONO8;
 					debug_msg.image = mDetector.getThresholdedImage();
 					debug_pub.publish(debug_msg.toImageMsg());

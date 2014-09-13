@@ -107,12 +107,12 @@ class ArSysSingleBoard
 				{
 					tf::Transform transform = ar_sys::getTf(the_board_detected.Rvec, the_board_detected.Tvec);
 
-					tf::StampedTransform stampedTransform(transform, ros::Time::now(), msg->header.frame_id, board_frame);
+					tf::StampedTransform stampedTransform(transform, msg->header.stamp, msg->header.frame_id, board_frame);
 					br.sendTransform(stampedTransform);
 					geometry_msgs::PoseStamped poseMsg;
 					tf::poseTFToMsg(transform, poseMsg.pose);
 					poseMsg.header.frame_id = msg->header.frame_id;
-					poseMsg.header.stamp = ros::Time::now();
+					poseMsg.header.stamp = msg->header.stamp;
 					pose_pub.publish(poseMsg);
 
 					geometry_msgs::TransformStamped transformMsg;
@@ -147,7 +147,8 @@ class ArSysSingleBoard
 				{
 					//show input with augmented information
 					cv_bridge::CvImage out_msg;
-					out_msg.header.stamp = ros::Time::now();
+					out_msg.header.frame_id = msg->header.frame_id;
+					out_msg.header.stamp = msg->header.stamp;
 					out_msg.encoding = sensor_msgs::image_encodings::RGB8;
 					out_msg.image = resultImg;
 					image_pub.publish(out_msg.toImageMsg());
@@ -157,7 +158,8 @@ class ArSysSingleBoard
 				{
 					//show also the internal image resulting from the threshold operation
 					cv_bridge::CvImage debug_msg;
-					debug_msg.header.stamp = ros::Time::now();
+					debug_msg.header.frame_id = msg->header.frame_id;
+					debug_msg.header.stamp = msg->header.stamp;
 					debug_msg.encoding = sensor_msgs::image_encodings::MONO8;
 					debug_msg.image = mDetector.getThresholdedImage();
 					debug_pub.publish(debug_msg.toImageMsg());
