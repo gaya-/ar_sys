@@ -113,7 +113,7 @@ class ArSysMultiBoards
 				board_t board;
 
 				board.uid = boards.size();
-				board.name = (std::string)(*it)["frame_id"];
+				board.name = (std::string)(*it)["name"];
 				board.marker_size = (double)(*it)["marker_size"];
 
 				std::string path(boards_directory);
