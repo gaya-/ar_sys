@@ -56,6 +56,10 @@ add_executable(multi_boards src/multi_boards.cpp
 add_dependencies(multi_boards ${PROJECT_NAME}_gencfg)
 target_link_libraries(multi_boards aruco ${catkin_LIBRARIES})
 
+add_executable(system_viewer src/system_viewer.cpp)
+add_dependencies(system_viewer ${PROJECT_NAME}_gencfg)
+target_link_libraries(system_viewer ${catkin_LIBRARIES})
+
 install(DIRECTORY include/
 	DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
 	FILES_MATCHING PATTERN "*.h"

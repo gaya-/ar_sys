@@ -6,3 +6,4 @@ ar_sys
 ## Usage:
 - roslaunch ar_sys single_board.launch
 - roslaunch ar_sys multi_boards.launch
+- roslaunch ar_sys system_viewer.launch
