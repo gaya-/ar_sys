@@ -24,10 +24,17 @@
 
 using namespace aruco;
 
+struct board_t
+{
+	int uid;
+	std::string name;
+	BoardConfiguration config;
+	double marker_size;
+};
+
 class ArSysMultiBoards
 {
 	private:
-		int boards_count;
 		cv::Mat inImage, resultImg;
 		aruco::CameraParameters camParam;
 		bool useRectifiedImages;
@@ -36,7 +43,6 @@ class ArSysMultiBoards
 		bool draw_markers_axis;
 		MarkerDetector mDetector;
 		vector<Marker> markers;
-		BoardConfiguration* boards_config_array;
 		BoardDetector the_board_detector;
 		ros::Subscriber cam_info_sub;
 		bool cam_info_received;
@@ -45,11 +51,9 @@ class ArSysMultiBoards
 		ros::Publisher pose_pub;
 		ros::Publisher transform_pub; 
 		ros::Publisher position_pub;
-		std::string* boards_frame_array;
-
-		double* markers_size_array;
 		std::string boards_config;
 		std::string boards_directory;
+		vector<board_t> boards;
 
 		ros::NodeHandle nh;
 		image_transport::ImageTransport it;
@@ -99,30 +103,28 @@ class ArSysMultiBoards
 
 		void readFromFile ( cv::FileStorage &fs ) throw ( cv::Exception )
 		{
-			boards_count = 0;
-			//look for the nboards
-			if (fs["ar_sys_nboards"].name() != "ar_sys_nboards")
+			//look for the ar_sys_boards
+			if (fs["ar_sys_boards"].name() != "ar_sys_boards")
 				throw cv::Exception ( 81818,"ArSysMultiBoards::readFromFile","invalid file type" ,__FILE__,__LINE__ );
-			fs["ar_sys_nboards"]>>boards_count;
 
-			ROS_ASSERT(boards_count > 0);
-
-			boards_config_array = new BoardConfiguration[boards_count];
-			boards_frame_array = new std::string[boards_count];
-			markers_size_array = new double[boards_count];
-
-			cv::FileNode boards=fs["ar_sys_boards"];
-			int board_index = 0;
-			for (cv::FileNodeIterator it = boards.begin(); it!=boards.end(); ++it,board_index++ )
+			cv::FileNode FnBoards=fs["ar_sys_boards"];
+			for (cv::FileNodeIterator it = FnBoards.begin(); it != FnBoards.end(); ++it)
 			{
+				board_t board;
+
+				board.uid = boards.size();
+				board.name = (std::string)(*it)["frame_id"];
+				board.marker_size = (double)(*it)["marker_size"];
+
 				std::string path(boards_directory);
 				path.append("/");
 				path.append((std::string)(*it)["path"]);
-				boards_config_array[board_index].readFromFile(path);
+				board.config.readFromFile(path);
 
-				boards_frame_array[board_index] = (std::string)(*it)["frame_id"];
-				markers_size_array[board_index] = (double)(*it)["marker_size"];
+				boards.push_back(board);
 			}
+
+			ROS_ASSERT(boards.size() > 0);
 		}
 
 		void image_callback(const sensor_msgs::ImageConstPtr& msg)
@@ -140,22 +142,22 @@ class ArSysMultiBoards
 				markers.clear();
 
 				//Ok, let's detect
-				double min_size = markers_size_array[0];
-				for (int board_index = 1; board_index < boards_count; board_index++)
-					if (min_size > markers_size_array[board_index]) min_size = markers_size_array[board_index];
+				double min_size = boards[0].marker_size;
+				for (int board_index = 1; board_index < boards.size(); board_index++)
+					if (min_size > boards[board_index].marker_size) min_size = boards[board_index].marker_size;
 				mDetector.detect(inImage, markers, camParam, min_size, false);
 
-				for (int board_index = 0; board_index < boards_count; board_index++)
+				for (int board_index = 0; board_index < boards.size(); board_index++)
 				{
 					Board board_detected;
 
 					//Detection of the board
-					float probDetect = the_board_detector.detect(markers, boards_config_array[board_index], board_detected, camParam, markers_size_array[board_index]);
+					float probDetect = the_board_detector.detect(markers, boards[board_index].config, board_detected, camParam, boards[board_index].marker_size);
 					if (probDetect > 0.0)
 					{
 						tf::Transform transform = ar_sys::getTf(board_detected.Rvec, board_detected.Tvec);
 
-						tf::StampedTransform stampedTransform(transform, msg->header.stamp, msg->header.frame_id, boards_frame_array[board_index]);
+						tf::StampedTransform stampedTransform(transform, msg->header.stamp, msg->header.frame_id, boards[board_index].name);
 
 						geometry_msgs::PoseStamped poseMsg;
 						tf::poseTFToMsg(transform, poseMsg.pose);
