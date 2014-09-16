@@ -2,8 +2,8 @@
 Changelog for package ar_sys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2014-09-17)
+------------------
 * Fix the single marker coordinates to match ROS
 * Introducing system viewer; a node that is capable of handling input from multi-cameras and display all the boards and virtual relative points in 3D using Rviz
 * Replaced arrays and its count by vectors of enums
