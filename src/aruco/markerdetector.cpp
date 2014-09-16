@@ -27,13 +27,13 @@ or implied, of Rafael Muñoz Salinas.
 ********************************/
 #include <aruco/markerdetector.h>
 #include <aruco/subpixelcorner.h>
+#include <aruco/arucofidmarkers.h>
+#include <aruco/ar_omp.h>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <iostream>
 #include <fstream>
-#include <aruco/arucofidmarkers.h>
 #include <valarray>
-#include <aruco/ar_omp.h>
 using namespace std;
 using namespace cv;
   

@@ -43,15 +43,15 @@ void CvDrawingUtils::draw3dAxis(cv::Mat &Image,Marker &m,const CameraParameters 
     objectPoints.at<float>(0,0)=0;
     objectPoints.at<float>(0,1)=0;
     objectPoints.at<float>(0,2)=0;
-    objectPoints.at<float>(1,0)=size;
-    objectPoints.at<float>(1,1)=0;
+    objectPoints.at<float>(1,0)=0;
+    objectPoints.at<float>(1,1)=size;
     objectPoints.at<float>(1,2)=0;
-    objectPoints.at<float>(2,0)=0;
-    objectPoints.at<float>(2,1)=-size;
+    objectPoints.at<float>(2,0)=-size;
+    objectPoints.at<float>(2,1)=0;
     objectPoints.at<float>(2,2)=0;
     objectPoints.at<float>(3,0)=0;
     objectPoints.at<float>(3,1)=0;
-    objectPoints.at<float>(3,2)=-size;
+    objectPoints.at<float>(3,2)=size;
 
     vector<Point2f> imagePoints;
     cv::projectPoints( objectPoints, m.Rvec,m.Tvec, CP.CameraMatrix,CP.Distorsion,   imagePoints);
