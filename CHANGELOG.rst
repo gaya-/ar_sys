@@ -2,6 +2,12 @@
 Changelog for package ar_sys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update the package to declare its visualization_msgs dependency
+* Initial tracks.yaml
+* Contributors: Hamdi Sahloul
+
 1.0.1 (2014-09-17)
 ------------------
 * Fix the single marker coordinates to match ROS
@@ -15,5 +21,5 @@ Changelog for package ar_sys
 * Added launch command for the multi boards detector
 * Added multi-boards detection capability
 * Added a test board image for testing purposes
-* Initial revision: single board detection
+* Initial package: single board detection
 * Contributors: Hamdi Sahloul
