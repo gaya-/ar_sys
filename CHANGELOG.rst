@@ -2,8 +2,8 @@
 Changelog for package ar_sys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.2 (2014-09-17)
+------------------
 * Update the package to declare its visualization_msgs dependency
 * Initial tracks.yaml
 * Contributors: Hamdi Sahloul
