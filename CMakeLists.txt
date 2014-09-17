@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 	pal_vision_segmentation
 	roscpp
 	tf
+	visualization_msgs
 )
 
 ###################################
