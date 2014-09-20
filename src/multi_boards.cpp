@@ -76,7 +76,7 @@ class ArSysMultiBoards
 			transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
 			position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
 
-			nh.param<std::string>("boards_config", boards_config, "boardConfiguration.yml");
+			nh.param<std::string>("boards_config", boards_config, "boardsConfiguration.yml");
 			nh.param<std::string>("boards_directory", boards_directory, "./data");
 			nh.param<bool>("image_is_rectified", useRectifiedImages, true);
 			nh.param<bool>("draw_markers", draw_markers, false);
