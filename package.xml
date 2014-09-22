@@ -5,7 +5,7 @@
 	<description>3D pose estimation ROS package using ArUco marker boards.</description>
 	<maintainer email="sahloul@race.u-tokyo.ac.jp">Hamdi Sahloul</maintainer>
 	<license>BSD</license>
-	<url type="website">http://www.uco.es/investiga/grupos/ava/node/26</url>
+	<url type="website">http://wiki.ros.org/ar_sys</url>
 	<author email="sahloul@race.u-tokyo.ac.jp">Hamdi Sahloul</author>
 	<author email="rmsalinas@uco.es">Rafael Muñoz Salinas</author>
 	<author email="bence.magyar@pal-robotics.com">Bence Magyar</author>
