@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <launch>
+	<node pkg="topic_tools" type="relay" name="relay1" args="/ar_single_board/transform /ar_sys_boards/transform" />
+	<node pkg="topic_tools" type="relay" name="relay2" args="/ar_multi_boards/transform /ar_sys_boards/transform" />
+
 	<node pkg="ar_sys" type="system_viewer" name="ar_system_viewer" output="screen">
-		<remap from="/transform" to="/ar_multi_boards/transform" />
+		<remap from="/transform" to="/ar_sys_boards/transform" />
 
 		<param name="map_path" type="string" value="$(find ar_sys)/data/viewer/map.yml"/>
 		<param name="digital_filter_change_rate" type="double" value="0.5"/>
