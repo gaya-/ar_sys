@@ -2,6 +2,16 @@
 Changelog for package ar_sys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.3 (2014-09-23)
+------------------
+* Changed size to support small screens
+* Prefixed frame_ids by / for topic_tools/relay compatibility in groovy
+* Employed topic_tools/relay to monitor both single and multi boards transform
+* Update the package URL
+* Remove false dependency
+* Correct the default path of boards_config
+* Contributors: Hamdi Sahloul
+
 1.0.2 (2014-09-17)
 ------------------
 * Update the package to declare its visualization_msgs dependency
