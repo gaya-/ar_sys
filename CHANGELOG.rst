@@ -2,6 +2,11 @@
 Changelog for package ar_sys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.4 (2014-09-26)
+------------------
+* Added install instructions
+* Contributors: Hamdi Sahloul
+
 1.0.3 (2014-09-23)
 ------------------
 * Changed size to support small screens
