@@ -5,5 +5,8 @@ ar_sys
 
 ## Usage:
 - roslaunch ar_sys single_board.launch
-- roslaunch ar_sys multi_boards.launch
+- roslaunch ar_sys multi-boards.launch
 - roslaunch ar_sys system_viewer.launch
+
+## Wiki:
+See http://wiki.ros.org/ar_sys
