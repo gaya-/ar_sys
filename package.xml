@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
 	<name>ar_sys</name>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<description>3D pose estimation ROS package using ArUco marker boards.</description>
 	<maintainer email="sahloul@race.u-tokyo.ac.jp">Hamdi Sahloul</maintainer>
 	<license>BSD</license>

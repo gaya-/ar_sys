@@ -2,8 +2,8 @@
 Changelog for package ar_sys
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.5 (2014-09-30)
+------------------
 * Added arguments to launch files
 * Contributors: Hamdi Sahloul
 
