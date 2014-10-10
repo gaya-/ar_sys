@@ -51,7 +51,7 @@
 		<param name="draw_markers_axis" type="bool" value="$(arg result_draw_markers_axis)" />
 	</node>
 
-	<node ns="/" pkg="topic_tools" type="relay" name="ar_single_board_relay$(arg uid)" args="/ar_single_board$(arg uid)/transform /ar_single_board/transform" />
+	<node ns="/" pkg="topic_tools" type="relay" name="ar_single_board_relay$(arg uid)" args="/ar_single_board$(arg uid)/transform /arsys_single_board/transform" />
 
 	<group if="$(arg result_display)">
 		<node ns="/" pkg="image_view" type="image_view" name="image_view$(arg uid)" output="screen">

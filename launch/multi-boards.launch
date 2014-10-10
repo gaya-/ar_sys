@@ -49,7 +49,7 @@
 		<param name="draw_markers_axis" type="bool" value="$(arg result_draw_markers_axis)" />
 	</node>
 
-	<node ns="/" pkg="topic_tools" type="relay" name="ar_multi_boards_relay$(arg uid)" args="/ar_multi_boards$(arg uid)/transform /ar_multi_boards/transform" />
+	<node ns="/" pkg="topic_tools" type="relay" name="ar_multi_boards_relay$(arg uid)" args="/ar_multi_boards$(arg uid)/transform /arsys_multi_boards/transform" />
 
 	<group if="$(arg result_display)">
 		<node ns="/" pkg="image_view" type="image_view" name="image_view$(arg uid)" output="screen">
