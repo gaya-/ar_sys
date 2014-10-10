@@ -281,6 +281,8 @@ class ArSysViewer
 				digital_filter(relativeBoards_map[relativeName].board.transform, boards_map[transformMsg.child_frame_id].transform * relativeBoards_map[relativeName].transforms_map[transformMsg.child_frame_id]);
 				tf::StampedTransform relativeStampedTransform(relativeBoards_map[relativeName].board.transform, transformMsg.header.stamp, "world", relativeName);
 				broadcaster.sendTransform(relativeStampedTransform);
+				tf::transformStampedTFToMsg(relativeStampedTransform, absTransformMsg);
+				transform_pub.publish(absTransformMsg);
 			}
 
 			//Generate visual marker
