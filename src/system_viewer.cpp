@@ -59,6 +59,7 @@ class ArSysViewer
 		double digital_filter_change_rate;
 
 		ros::Subscriber transform_sub;
+		ros::Publisher transform_pub; 
 		ros::Publisher rviz_marker_pub;
 		tf::TransformBroadcaster broadcaster;
 		ros::NodeHandle nh;
@@ -69,6 +70,7 @@ class ArSysViewer
 		{
 			transform_sub = nh.subscribe ("/transform", 1, &ArSysViewer::transform_callback, this);
 
+			transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
 			rviz_marker_pub = nh.advertise <visualization_msgs::Marker> ("visualization_marker", 0);
 
 			nh.param<std::string>("map_path", map_path, "map.yml");
@@ -269,6 +271,9 @@ class ArSysViewer
 				digital_filter(boards_map[transformMsg.child_frame_id].transform, cameras_map[transformMsg.header.frame_id].transform * stampedTransform));
 			stampedTransform.frame_id_ = camStampedTransform.frame_id_;
 			broadcaster.sendTransform(stampedTransform);
+			geometry_msgs::TransformStamped absTransformMsg;
+			tf::transformStampedTFToMsg(stampedTransform, absTransformMsg);
+			transform_pub.publish(absTransformMsg);
 			if (boards_map[transformMsg.child_frame_id].type == RELATIVE)
 			{
 				std::string relativeName = boards_map[transformMsg.child_frame_id].relativeName;
