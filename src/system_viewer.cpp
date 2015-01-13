@@ -263,7 +263,7 @@ class ArSysViewer
 			{
 				digital_filter(cameras_map[transformMsg.header.frame_id].transform, boards_map[transformMsg.child_frame_id].transform * stampedTransform.inverse());
 			}
-			tf::StampedTransform camStampedTransform (cameras_map[transformMsg.header.frame_id].transform, transformMsg.header.stamp, "world", transformMsg.header.frame_id);
+			tf::StampedTransform camStampedTransform (cameras_map[transformMsg.header.frame_id].transform, transformMsg.header.stamp, "camera_link", transformMsg.header.frame_id);
 			broadcaster.sendTransform(camStampedTransform);
 
 			stampedTransform.setData(boards_map[transformMsg.child_frame_id].type == FIXED ?
